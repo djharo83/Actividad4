@@ -1,0 +1,8 @@
+# Documentos de Word
+*.doc
+*.docx
+
+# Imágenes
+*.png
+*.jpg
+*.jpeg
