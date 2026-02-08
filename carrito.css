@@ -94,17 +94,6 @@ main{
     cursor: pointer;
 }
 
-/*Quitar las flechas (spinners de los inputs)*/
-input::-webkit-outer-spin-button{
-    -webkit-appearance: textfield;
-    appearance:textfield;
-}
-
-input[type=number]{
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
 /*Estilos para el div del resumen*/
 .summary{
     flex: 1; /*Ocupa 1 parte del espacio disponible*/
@@ -117,11 +106,11 @@ input[type=number]{
 }
 
 .summary-title{
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     margin-bottom: 20px;
-    text-align: center;
-    border-bottom: 2px solid #b1a6a6;
+    text-align: left;
+    /*border-bottom: 2px solid #b1a6a6;*/
     padding-bottom: 10px;
 }
 
@@ -138,7 +127,21 @@ input[type=number]{
     justify-content: space-between;
     margin-top: 25px;
     padding-top: 10px;
-    border-top: 2px solid #333;
+    border-top: 2px solid;
     font-weight: bold;
     font-size: larger;
+}
+
+/*Quitar las flechas (spinners de los inputs)*/
+/*Edge Chrome*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* 2. Para Firefox */
+input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
 }

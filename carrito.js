@@ -10,7 +10,7 @@ class Carrito {
         this.currency = currency;
     }
 
-    actualizarUnidades(sku, unidades) {
+    updateUnits(sku, unidades) {
 
         // Actualiza el número de unidades que se quieren comprar de un producto
 
@@ -22,7 +22,7 @@ class Carrito {
         }
     }
 
-    obtenerInformacionProducto(sku) {
+    getProductInformation(sku) {
 
         // Devuelve los datos de un producto además de las unidades seleccionadas
 
@@ -35,6 +35,7 @@ class Carrito {
                     "sku":product.SKU,
                     "price":Number(product.price),
                     "quantity": product.quantity,
+                    "totalProducts": (Number(product.price) * product.quantity).toFixed(2)
             }
         }
 
@@ -42,24 +43,7 @@ class Carrito {
         return null;
     }
 
-    obtenerTotalProducto(sku){
-
-        //Devuelve el precio total para un producto 
-
-        const product = this.products.find(product=> product.SKU === sku);
-
-        let totalProdcuto = 0;
-
-        if(product){
-
-            return (Number(product.price) * product.quantity).toFixed(2);
-        }
-        
-        return totalProdcuto;
-        
-    }
-
-    obtenerCarrito() {
+    getCart() {
 
       // Devuelve información de los productos añadidos al carrito
       // Además del total calculado de todos los productos
@@ -72,14 +56,14 @@ class Carrito {
                     "sku":product.SKU,
                     "price":Number(product.price),
                     "quantity": product.quantity,
-                    "totalProducts": Number(product.price) * product.quantity
+                    "totalProducts": (Number(product.price) * product.quantity).toFixed(2)
                 };
         });
 
         //Calculamos el total del carrito a partir del array de productosFinales obtenido anteriormente
         let totalCarrito = 0;
         for(const product of productosFinales){
-            totalCarrito += product.totalProducts;
+            totalCarrito += Number(product.totalProducts);
         };
 
         //Devolvemos un objeto con el total del carrito la moneda que se esta utilizando y la información de los productos obtenidos anteriormente
@@ -90,8 +74,6 @@ class Carrito {
         };
     }
 }
-
-let carrito;
 
 async function getProducts() {
     try {
@@ -121,7 +103,7 @@ async function getProducts() {
 
 getProducts();
 
-function processJsonAndPaintProducts(dataResponse){
+const processJsonAndPaintProducts = (dataResponse) => {
     
     const products = dataResponse.products;
     const currency = dataResponse.currency;
@@ -131,10 +113,12 @@ function processJsonAndPaintProducts(dataResponse){
     });
 }
 
-
 const nodeDivDetails = document.querySelector('.details');
+const nodeSummaryProducts = document.getElementById('summary-products');
+const nodeSummarySpanTotalPrice = document.getElementById('totalPrice');
+let carrito;
 
-function paintProducts(product, currency){
+const paintProducts = (product, currency) => {
 
     //Row
     const nodeDivRow = document.createElement('div');
@@ -181,7 +165,7 @@ function paintProducts(product, currency){
     //Total
     const nodeDivTotal = document.createElement('div');
     nodeDivTotal.classList.add('total');
-    nodeDivTotal.textContent = 0+currency;
+    nodeDivTotal.textContent = `0${currency}`;
 
     //Añadimos los hijos a Row
     nodeDivRow.appendChild(nodeDivProduct);
@@ -192,8 +176,23 @@ function paintProducts(product, currency){
     //Añadimos row a details
     nodeDivDetails.appendChild(nodeDivRow);
 
-    //Creacion de eventos
+    //Summary
+    //Summary product
+    const nodeSummaryProduct = document.createElement('div');
+    nodeSummaryProduct.classList.add('summary-product');
 
+    const nodeSpanProductName = document.createElement('span');
+    nodeSpanProductName.textContent = `${product.title}`;
+    const nodeSpanProductPrice = document.createElement('span');
+    nodeSpanProductPrice.textContent = `0${currency}`;
+    
+    nodeSummaryProduct.appendChild(nodeSpanProductName);
+    nodeSummaryProduct.appendChild(nodeSpanProductPrice);
+	nodeSummaryProduct.style.display = 'none';
+	
+	nodeSummaryProducts.appendChild(nodeSummaryProduct);
+
+    //Creacion de eventos
     spanLess.addEventListener('click', () => {
 
         let valorActual = Number(input.value);
@@ -202,9 +201,7 @@ function paintProducts(product, currency){
             input.value = valorActual;                      
         }
 
-        carrito.actualizarUnidades(product.SKU, valorActual);
-        actualizarTotalProducto(product.SKU);
-        const estadoActualCarrito = carrito.obtenerCarrito();
+        updateTotalProductAndSummary(product.SKU, valorActual);
     });
 
     spanPlus.addEventListener('click', () => {
@@ -212,43 +209,45 @@ function paintProducts(product, currency){
         valorActual++;
         input.value = valorActual;
 
-        carrito.actualizarUnidades(product.SKU, valorActual);
-        actualizarTotalProducto(product.SKU);
-        const estadoActualCarrito = carrito.obtenerCarrito();
+        updateTotalProductAndSummary(product.SKU, valorActual);
 
     });
-
 
     //Si se escribe la coantidad por teclado.
     input.addEventListener('input', ()=> {
 
-        let valorActual = Number(input.value);
+        let valorActual = input.value ==="" ? 0 : Number(input.value);
 
-        carrito.actualizarUnidades(product.SKU, valorActual);
-        actualizarTotalProducto(product.SKU)
-        const estadoActualCarrito = carrito.obtenerCarrito();
-    
-    });
-
-    const actualizarTotalProducto = (sku)=>{
-
-        let cantidad = input.value === "" ? 0 : Number(input.value);
-
-        if(cantidad < 0){
-            cantidad = 0;
+        if(valorActual < 0){
+            valorActual = 0;
             input.value = 0;
         }
 
-        const totalProducto =  carrito.obtenerTotalProducto(sku);
+        updateTotalProductAndSummary(product.SKU, valorActual);
+    
+    });
+
+    const updateTotalProductAndSummary = (sku, valorActual) => {
+
+        //Actulizamos las unidades del carrito
+        carrito.updateUnits(sku, valorActual);
+
+        //Actualizamos el total de los productos añadidos
+        const product =  carrito.getProductInformation(sku);
+        const totalProduct = Number(product.totalProducts);
+        const totalProductPaint = totalProduct === 0 ? '0' : totalProduct;
+        nodeDivTotal.textContent = `${totalProductPaint}${currency}`;
+        nodeSpanProductPrice.textContent = `${totalProductPaint}${currency}`;;
+
+        if(valorActual > 0){
+            nodeSummaryProduct.style.display = 'flex';
+        }else{
+            nodeSummaryProduct.style.display = 'none';
+        }
         
-        nodeDivTotal.textContent = cantidad > 0 ? `${totalProducto}${currency}` : `${0}${currency}`;
+        //Pintamos el total del carrito
+        const totalCart = carrito.getCart().total;
+        const totalCartPaint = Number(totalCart) === 0 ? '0' : totalCart;
+        nodeSummarySpanTotalPrice.textContent = `${totalCartPaint}${currency}`;
     }
 }
-
-/*Intentar que cuando el usuario ponga la cantidad a cero la fila del producto en el resumen (summary)
-desaparezca visualmente en css hide ocultando el div donde este el producto?
-
-ver si puedo sacar la clase carrito a un archivo aparte Carrito.js o algo asi y ver que tengo que añadir en el html
-en  <script src="carrito.js"></script>
-
-*/
