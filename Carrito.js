@@ -13,7 +13,6 @@ export class Carrito {
     updateUnits(sku, unidades) {
 
         // Actualiza el número de unidades que se quieren comprar de un producto
-
         const product = this.products.find(product=> product.SKU === sku);
 
         //Buscamos el producto con find y si existe actualizamos su cantidad
