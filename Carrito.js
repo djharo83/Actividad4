@@ -2,22 +2,37 @@ export class Carrito {
     constructor(products, currency) {
 
         //Añadimos la propiedad quantity a cada producto recibido del API para saber que productos se han elegido.
-        this.products = products.map((product)=>{
-            product.quantity = 0;
-            return product;
-        });
-
+        this.productsCatalog = products;
+        this.products = [];
         this.currency = currency;
     }
 
-    updateUnits(sku, unidades) {
+    updateUnits(sku, units) {
 
         // Actualiza el número de unidades que se quieren comprar de un producto
-        const product = this.products.find(product=> product.SKU === sku);
+        
+        units = Number(units);
 
-        //Buscamos el producto con find y si existe actualizamos su cantidad
-        if(product){
-            product.quantity = Number(unidades);
+        const productCart = this.products.find(product=> product.SKU === sku);
+
+        //Buscamos el producto en nuestro carrito y si existe pero la cantidad es cero lo quitamos del carrito y si es mayor que cero añadimos la cantidad al producto
+        //Si el producto no esta en nuestro carrito lo buscamos en el catologo productos de API
+        if(productCart){
+            if(units <= 0){
+                this.products = this.products.filter(product=> product.SKU !== sku);
+            }else{
+                productCart.quantity = units;   
+            }                    
+        }else if (!productCart && units > 0){
+            const productCatalog = this.productsCatalog.find(productCatalog=> productCatalog.SKU === sku);
+            const newProduct = {
+                    "title":productCatalog.title,
+                    "SKU":productCatalog.SKU,
+                    "price":Number(productCatalog.price),
+                    "quantity": units
+            }
+            
+            this.products.push(newProduct);
         }
     }
 
@@ -36,10 +51,18 @@ export class Carrito {
                     "quantity": product.quantity,
                     "totalProducts": (Number(product.price) * product.quantity).toFixed(2)
             }
-        }
+        }else {
+            
+            const productCatalog = this.productsCatalog.find(productCatalog=> productCatalog.SKU === sku);
 
-        //Si el producto no existe devolvemos null
-        return null;
+            return {
+                    "name":productCatalog.title,
+                    "sku":productCatalog.SKU,
+                    "price":Number(productCatalog.price),
+                    "quantity": 0,
+                    "totalProducts": '0'
+            }
+        }
     }
 
     getCart() {

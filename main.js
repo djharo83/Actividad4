@@ -7,7 +7,7 @@ const paintProductsAndSummary = (carrito) => {
         const nodeSummaryProducts = document.getElementById('summary-products');
         const nodeSummarySpanTotalPrice = document.getElementById('totalPrice');
 
-        const products = carrito.products;
+        const products = carrito.productsCatalog;
         const currency = carrito.currency;
 
         products.forEach(product => {
@@ -91,7 +91,8 @@ const paintProductsAndSummary = (carrito) => {
             carrito.updateUnits(product.SKU, valorActual);
 
             //Actualizamos el total de los productos añadidos
-            const totalProduct = Number(carrito.getProductInformation(product.SKU).totalProducts);
+            const pruductInfo = carrito.getProductInformation(product.SKU);
+            const totalProduct = Number(pruductInfo.totalProducts);
             const totalProductPaint = totalProduct === 0 ? '0' : totalProduct;
             nodeDivTotal.textContent = `${totalProductPaint}${currency}`;
             nodeSpanProductPrice.textContent = `${totalProductPaint}${currency}`;
@@ -105,7 +106,6 @@ const paintProductsAndSummary = (carrito) => {
 
         //Creacion de eventos
         spanLess.addEventListener('click', () => {
-
             let valorActual = Number(input.value);
             if(valorActual > 0){
                 valorActual--;
